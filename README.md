@@ -1,17 +1,20 @@
-# ScrapingMitPython
-Challenge from the module 122 in TBZ school
+# Google-Scraper mit Selenium und PostgreSQL
 
-# Web Scraper with Dockerized PostgreSQL
+Ein einfacher Web-Scraper, der Google-Suchergebnisse abruft und in CSV und PostgreSQL speichert.
 
-## Beschreibung
-Dieses Projekt scrapt Webseiten direkt ohne API und speichert die Ergebnisse in einer PostgreSQL-Datenbank, die in einem Docker-Container läuft. Es ist parametrisierbar mit benutzerdefinierten URLs.
+## Funktionen
+- **Eingabe**: Suchbegriff interaktiv.
+- **Datenextraktion**: Titel, Links, Beschreibungen von Google.
+- **Speicherung**: CSV (`results.csv`), PostgreSQL (Schema: `google_scraper`, Tabelle: `search_results`).
 
 ## Voraussetzungen
-- Docker Desktop
-- Python 3.x (local)
-- ChromeDriver (local)
+- Python 3.8+
+- Google Chrome (mit [ChromeDriver](https://chromedriver.chromium.org/downloads))
+- Docker (für PostgreSQL)
+- Pakete: `selenium`, `beautifulsoup4`, `pandas`, `sqlalchemy`, `pg8000`
 
-## Installation
-1. Starte PostgreSQL in Docker:
-   ```powershell
-   docker run -d --name postgres-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=google_scraper -p 5432:5432 postgres:13
+## Einrichtung
+1. **Repository klonen**:
+   ```bash
+   git clone https://github.com/Felip123/ScrapingMitPython.git
+   cd ScrapingMitPython
