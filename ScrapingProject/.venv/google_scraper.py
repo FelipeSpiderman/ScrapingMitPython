@@ -58,6 +58,11 @@ df = pd.DataFrame(l)
 df.to_csv('google.csv', index=False, encoding='utf-8')
 
 engine = create_engine("postgresql+pg8000://postgres:postgres@localhost:5432/postgres")
+try:
+    with engine.connect() as connection:
+        print("Connection successful!")
+except Exception as e:
+    print(f"Connection failed: {e}")
 df.to_sql('search_results', engine, schema="google_scraper", if_exists='append', index=False)
 
 print(l)
