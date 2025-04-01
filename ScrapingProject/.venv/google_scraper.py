@@ -1,106 +1,63 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 import time
 from bs4 import BeautifulSoup
-import psycopg2
-from psycopg2 import Error
-import urllib.parse
+import pandas as pd
+from sqlalchemy import create_engine
 
-# Database connection parameters (for Dockerized Postgres)
-DB_PARAMS = {
-    "dbname": "google_scraper",
-    "user": "postgres",
-    "password": "mysecretpassword",
-    "host": "localhost",
-    "port": "5432"
-}
 
-# ChromeDriver setup
-options = Options()
-options.add_argument("--window-size=1920,1080")
+
+CHROMEDRIVER_PATH = "C:/Work/Git/ScrapingMitPython/chromedriver-win64/chromedriver.exe"
+
+
+service = Service(CHROMEDRIVER_PATH)
+options = webdriver.ChromeOptions()
+
+
+options.add_argument("--window-size=1920,1080")  # Set window size
 options.add_argument("--disable-blink-features=AutomationControlled")
-driver = webdriver.Chrome(service=Service(), options=options)  # Adjust path if needed
 
+driver = webdriver.Chrome(service=service, options=options)
 
-def connect_to_db():
-    try:
-        connection = psycopg2.connect(**DB_PARAMS)
-        return connection
-    except Error as e:
-        print(f"Error connecting to PostgreSQL: {e}")
-        return None
+# Open Google Search URL
+search_url = "https://www.google.com/search?q=lead+generation+tools&oq=lead+generation+tools"
 
+driver.get(search_url)
 
-def save_to_db(connection, query, results):
-    try:
-        cursor = connection.cursor()
-        for result in results:
-            cursor.execute("""
-                INSERT INTO google_scraper.search_results (search_query, title, link, description)
-                VALUES (%s, %s, %s, %s)
-            """, (query, result.get('title'), result.get('link'), result.get('description')))
-        connection.commit()
-        print("Data successfully saved to database")
-    except Error as e:
-        print(f"Error saving to database: {e}")
-        connection.rollback()
-    finally:
-        cursor.close()
-
-
-# Get URL from user input and extract query
-custom_url = input("Please enter the URL you want to scrape: ")
-parsed_url = urllib.parse.urlparse(custom_url)
-query = urllib.parse.parse_qs(parsed_url.query).get('q', [''])[0]  # Extract 'q' parameter (e.g., "hello")
-driver.get(custom_url)
-
-# Wait for page to load
+# Wait for the page to load
 time.sleep(2)
 
 page_html = driver.page_source
-soup = BeautifulSoup(page_html, 'html.parser')
-results = []
 
-# Scrape logic
-try:
-    allData = soup.find("div", {"class": "dURPMd"}).find_all("div", {"class": "Ww4FFb"})
-    print(f"Found {len(allData)} results")
+soup = BeautifulSoup(page_html,'html.parser')
+obj={}
+l=[]
+allData = soup.find("div",{"class":"dURPMd"}).find_all("div",{"class":"Ww4FFb"})
+print(len(allData))
+for i in range(0,len(allData)):
+    try:
+        obj["title"]=allData[i].find("h3").text
+    except:
+        obj["title"]=None
 
-    for item in allData:
-        obj = {}
-        try:
-            title = item.find("h3").text[:100]  # Limit to 100 chars
-            obj["title"] = title if title else None
-        except:
-            obj["title"] = None
-        try:
-            link = item.find("a").get('href')[:200]  # Limit to 200 chars
-            obj["link"] = link if link else None
-        except:
-            obj["link"] = None
-        try:
-            desc = item.find("div", {"class": "VwiC3b"}).text[:300]  # Limit to 300 chars
-            obj["description"] = desc if desc else None
-        except:
-            obj["description"] = None
-        results.append(obj)
+    try:
+        obj["link"]=allData[i].find("a").get('href')
+    except:
+        obj["link"]=None
 
-except AttributeError:
-    print("Using fallback scraping for non-Google pages")
-    titles = soup.find_all(['h1', 'h2', 'h3'])
-    links = soup.find_all('a', href=True)
+    try:
+        obj["description"]=allData[i].find("div",{"class":"VwiC3b"}).text
+    except:
+        obj["description"]=None
 
-    for title in titles:
-        results.append({"title": title.text.strip()[:100], "link": None, "description": None})
-    for link in links:
-        if link.text.strip():
-            results.append({"title": link.text.strip()[:100], "link": link.get('href')[:200], "description": None})
+    l.append(obj)
+    obj={}
 
-# Save to database
-connection = connect_to_db()
-if connection:
-    save_to_db(connection, query, results)
-    connection.close()
+df = pd.DataFrame(l)
+df.to_csv('google.csv', index=False, encoding='utf-8')
 
-driver.quit()
+engine = create_engine("postgresql+pg8000://postgres:postgres@localhost:5432/postgres")
+df.to_sql('search_results', engine, schema="google_scraper", if_exists='append', index=False)
+
+print(l)
