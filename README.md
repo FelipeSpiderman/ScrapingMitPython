@@ -1,20 +1,24 @@
-# Google-Scraper mit Selenium und PostgreSQL
+# Google Scraper with Selenium and PostgreSQL
 
-Ein einfacher Web-Scraper, der Google-Suchergebnisse abruft und in CSV und PostgreSQL speichert.
+A simple web scraper that retrieves Google search results based on user input and stores the data in a CSV file as well as a PostgreSQL database.
 
-## Funktionen
-- **Eingabe**: Suchbegriff interaktiv.
-- **Datenextraktion**: Titel, Links, Beschreibungen von Google.
-- **Speicherung**: CSV (`results.csv`), PostgreSQL (Schema: `google_scraper`, Tabelle: `search_results`).
+## Features
+- **Interactive Input**: Enter a search term (or `exit` to quit).
+- **Data Extraction**: Titles, links, and descriptions from Google search results.
+- **Storage**: 
+  - CSV file (`results.csv`).
+  - PostgreSQL database (Schema: `google_scraper`, Table: `search_results`).
+- **Error Handling**: Messages for connection issues or missing results.
 
-## Voraussetzungen
-- Python 3.8+
-- Google Chrome (mit [ChromeDriver](https://chromedriver.chromium.org/downloads))
-- Docker (für PostgreSQL)
-- Pakete: `selenium`, `beautifulsoup4`, `pandas`, `sqlalchemy`, `pg8000`
+## Prerequisites
+- **Python 3.8+**: [Download](https://www.python.org/downloads/)
+- **Google Chrome**: With matching [ChromeDriver](https://chromedriver.chromium.org/downloads)
+- **Docker**: For PostgreSQL [Install](https://www.docker.com/get-started)
+- **Python Packages**: `selenium`, `beautifulsoup4`, `pandas`, `sqlalchemy`, `pg8000`
 
-## Einrichtung
-1. **Repository klonen**:
-   ```bash
-   git clone https://github.com/Felip123/ScrapingMitPython.git
-   cd ScrapingMitPython
+## Setup
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Felip123/ScrapingMitPython.git
+cd ScrapingMitPython
